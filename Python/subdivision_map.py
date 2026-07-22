@@ -3,25 +3,25 @@ from collections import deque
 import math
 
 # =====================================================================
-# 1. MAP GEOMETRY & LANDMARKS (Earth and Homes Subdivision)
+# 1. EARTH AND HOMES (BALAGTAS) MAP GEOMETRY & CONNECTIONS
 # =====================================================================
 JUNCTION_GRAPH = {
-    # === ENTRANCE GATE ===
+    # === ENTRANCE GATE (Located at Balagtas Text on Map) ===
     "Entrance_Gate_J1": {"x": 131, "y": 86, "neighbors": ["Junction_2"]},
     "Junction_2": {"x": 191, "y": 188, "neighbors": ["Entrance_Gate_J1", "Junction_3"]},
     
-    # West Grid Row 1
+    # West Grid Row 1 (Top Intersections near Gate)
     "Junction_3": {"x": 144, "y": 205, "neighbors": ["Junction_2", "Junction_4", "Junction_9"]},
     "Junction_4": {"x": 99,  "y": 232, "neighbors": ["Junction_3", "Junction_5", "Junction_8"]},
     "Junction_5": {"x": 60,  "y": 265, "neighbors": ["Junction_4", "Junction_6"]},
     
-    # West Grid Row 2
+    # West Grid Row 2 (Middle Crossroad Row)
     "Junction_6": {"x": 112, "y": 451, "neighbors": ["Junction_5", "Junction_7", "Junction_10"]},
     "Junction_7": {"x": 182, "y": 451, "neighbors": ["Junction_6", "Junction_8", "Junction_11"]},
     "Junction_8": {"x": 230, "y": 430, "neighbors": ["Junction_7", "Junction_4", "Junction_9", "Junction_12"]},
     "Junction_9": {"x": 284, "y": 392, "neighbors": ["Junction_8", "Junction_3", "Junction_13"]},
     
-    # West Grid Row 3
+    # West Grid Row 3 (Lower Crossroad Row)
     "Junction_10": {"x": 160, "y": 570, "neighbors": ["Junction_6", "Junction_11"]},
     "Junction_11": {"x": 218, "y": 562, "neighbors": ["Junction_10", "Junction_7", "Junction_12"]},
     "Junction_12": {"x": 252, "y": 562, "neighbors": ["Junction_11", "Junction_8", "Junction_13", "Junction_15"]},
@@ -31,12 +31,12 @@ JUNCTION_GRAPH = {
     "Junction_14": {"x": 363, "y": 560, "neighbors": ["Junction_13", "Junction_17"]},
     "Junction_15": {"x": 263, "y": 569, "neighbors": ["Junction_12", "Junction_16"]},
     
-    # Western Bends & Central Spine
+    # === WESTERN ROUNDABOUT / BEND ===
     "Junction_16": {"x": 349, "y": 620, "neighbors": ["Junction_15", "Junction_18"]},
     "Junction_17": {"x": 357, "y": 568, "neighbors": ["Junction_14", "Junction_18", "Junction_19"]},
     "Junction_18": {"x": 352, "y": 607, "neighbors": ["Junction_16", "Junction_17", "Junction_20"]},
     
-    # Central Main Avenue
+    # === MAIN CENTRAL AVENUE (Passing Earth & Homes / Coco House) ===
     "Junction_19": {"x": 419, "y": 560, "neighbors": ["Junction_17", "Junction_21"]},
     "Junction_21": {"x": 422, "y": 574, "neighbors": ["Junction_19", "Junction_25"]},
     "Junction_25": {"x": 649, "y": 474, "neighbors": ["Junction_21", "Junction_23"]},
@@ -47,7 +47,7 @@ JUNCTION_GRAPH = {
     "Junction_26": {"x": 725, "y": 539, "neighbors": ["Junction_22", "Junction_24"]},
     "Junction_24": {"x": 728, "y": 553, "neighbors": ["Junction_26", "Junction_28"]},
     
-    # Eastern Section & Loops
+    # === EASTERN SECTION & EAST LOOP (Dolindo / Tats San Juan / Block 1) ===
     "Junction_28": {"x": 816, "y": 544, "neighbors": ["Junction_24", "Junction_30", "Junction_35"]},
     "Junction_30": {"x": 824, "y": 531, "neighbors": ["Junction_28", "Junction_29"]},
     "Junction_29": {"x": 838, "y": 484, "neighbors": ["Junction_30", "Junction_27"]},
@@ -68,46 +68,39 @@ JUNCTION_GRAPH = {
     "Junction_41": {"x": 1025, "y": 689, "neighbors": ["Junction_40", "Junction_34"]}
 }
 
-# Named Points & Google Maps Real Landmarks
 HOUSES = {
-    # Custom Labels
-    "My House": {"x": 184, "y": 169},
-    "Guard House": {"x": 212, "y": 240},
-    "Gazebo": {"x": 287, "y": 614},
-    
-    # Real Google Maps Landmarks
-    "Community Center": {"x": 420, "y": 565},
-    "Coco House": {"x": 550, "y": 530},
-    "Claros Residence": {"x": 560, "y": 440},
-    "Tats San Juan": {"x": 650, "y": 480},
-    "Dolindo Residence": {"x": 640, "y": 640},
-    "Block 1 Lot A5": {"x": 740, "y": 545},
-
-    # Standard Houses
+    "House 1": {"x": 184, "y": 169}, "House 2": {"x": 212, "y": 240},
     "House 3": {"x": 159, "y": 252}, "House 4": {"x": 202, "y": 356},
     "House 5": {"x": 142, "y": 343}, "House 6": {"x": 169, "y": 418},
     "House 7": {"x": 68, "y": 313},  "House 8": {"x": 69, "y": 335},
     "House 9": {"x": 322, "y": 479}, "House 10": {"x": 322, "y": 489},
-    "House 11": {"x": 167, "y": 572}, "House 13": {"x": 122, "y": 506},
-    "House 14": {"x": 151, "y": 546}, "House 15": {"x": 216, "y": 547},
-    "House 16": {"x": 198, "y": 515}, "House 17": {"x": 531, "y": 521},
-    "House 18": {"x": 506, "y": 538}, "House 19": {"x": 455, "y": 628},
-    "House 20": {"x": 494, "y": 623}, "House 21": {"x": 578, "y": 596},
-    "House 22": {"x": 621, "y": 579}, "House 23": {"x": 668, "y": 562},
-    "House 24": {"x": 714, "y": 552}, "House 25": {"x": 677, "y": 489},
-    "House 26": {"x": 689, "y": 445}, "House 27": {"x": 751, "y": 454},
-    "House 28": {"x": 800, "y": 452}, "House 29": {"x": 719, "y": 454},
-    "House 30": {"x": 870, "y": 478}, "House 31": {"x": 822, "y": 540},
-    "House 32": {"x": 831, "y": 489}, "House 33": {"x": 900, "y": 498},
-    "House 34": {"x": 833, "y": 606}, "House 35": {"x": 986, "y": 574},
-    "House 36": {"x": 959, "y": 640}, "House 37": {"x": 1098, "y": 615},
-    "House 38": {"x": 1070, "y": 693}, "House 39": {"x": 1062, "y": 424}
+    "House 11": {"x": 167, "y": 572}, "House 12": {"x": 287, "y": 614},
+    "House 13": {"x": 122, "y": 506}, "House 14": {"x": 151, "y": 546},
+    "House 15": {"x": 216, "y": 547}, "House 16": {"x": 198, "y": 515},
+    "House 17": {"x": 531, "y": 521}, "House 18": {"x": 506, "y": 538},
+    "House 19": {"x": 455, "y": 628}, "House 20": {"x": 494, "y": 623},
+    "House 21": {"x": 578, "y": 596}, "House 22": {"x": 621, "y": 579},
+    "House 23": {"x": 668, "y": 562}, "House 24": {"x": 714, "y": 552},
+    "House 25": {"x": 677, "y": 489}, "House 26": {"x": 689, "y": 445},
+    "House 27": {"x": 751, "y": 454}, "House 28": {"x": 800, "y": 452},
+    "House 29": {"x": 719, "y": 454}, "House 30": {"x": 870, "y": 478},
+    "House 31": {"x": 822, "y": 540}, "House 32": {"x": 831, "y": 489},
+    "House 33": {"x": 900, "y": 498}, "House 34": {"x": 833, "y": 606},
+    "House 35": {"x": 986, "y": 574}, "House 36": {"x": 959, "y": 640},
+    "House 37": {"x": 1098, "y": 615}, "House 38": {"x": 1070, "y": 693},
+    "House 39": {"x": 1062, "y": 424}
 }
 
-METERS_PER_PIXEL = 0.65 
+# How far (in pixels) a house is allowed to sit from its connecting road
+# before it gets pulled in to hug the street. Houses already closer than
+# this are left exactly where they are.
+HOUSE_ROAD_HUG_DISTANCE = 16
+
 
 def assemble_full_map():
-    """Builds clean map network with custom house and landmark attachments."""
+    """Combines junction network and attaches each house to its nearest
+    street driveway, pulling any house that floats far from the road
+    inward so it visually sits right beside its street."""
     full_map = {node: dict(data) for node, data in JUNCTION_GRAPH.items()}
     junction_keys = list(JUNCTION_GRAPH.keys())
 
@@ -117,8 +110,19 @@ def assemble_full_map():
             junction_keys,
             key=lambda j: math.hypot(JUNCTION_GRAPH[j]["x"] - hx, JUNCTION_GRAPH[j]["y"] - hy)
         )
+        jx, jy = JUNCTION_GRAPH[closest_j]["x"], JUNCTION_GRAPH[closest_j]["y"]
+        dist_to_road = math.hypot(jx - hx, jy - hy)
 
-        full_map[house_name] = {"x": hx, "y": hy, "neighbors": [closest_j]}
+        if dist_to_road > HOUSE_ROAD_HUG_DISTANCE:
+            # Pull the house in along the same direction, so it hugs the
+            # road instead of floating far away from it.
+            ratio = HOUSE_ROAD_HUG_DISTANCE / dist_to_road
+            draw_x = jx + (hx - jx) * ratio
+            draw_y = jy + (hy - jy) * ratio
+        else:
+            draw_x, draw_y = hx, hy
+
+        full_map[house_name] = {"x": draw_x, "y": draw_y, "neighbors": [closest_j]}
         full_map[closest_j]["neighbors"].append(house_name)
 
     return full_map
@@ -175,17 +179,6 @@ def calculate_paths(graph, start, target):
 
     return path1, path2
 
-def calculate_path_distance_meters(path):
-    if not path or len(path) < 2:
-        return 0.0
-    total_pixels = 0.0
-    for i in range(len(path) - 1):
-        n1, n2 = path[i], path[i + 1]
-        x1, y1 = SUBDIVISION_MAP[n1]["x"], SUBDIVISION_MAP[n1]["y"]
-        x2, y2 = SUBDIVISION_MAP[n2]["x"], SUBDIVISION_MAP[n2]["y"]
-        total_pixels += math.hypot(x2 - x1, y2 - y1)
-    return total_pixels * METERS_PER_PIXEL
-
 # =====================================================================
 # 3. UI PRESENTATION ENGINE (Tkinter)
 # =====================================================================
@@ -195,9 +188,7 @@ class SubdivisionMapApp:
         self.root.title("Earth and Homes Subdivision (Balagtas) - Navigation System")
         self.root.configure(bg="#0f141c")
 
-        # Selectable targets
-        selectable_nodes = [node for node in SUBDIVISION_MAP.keys() if "Junction" not in node]
-        selectable_nodes.sort()
+        sorted_keys = sorted(SUBDIVISION_MAP.keys())
 
         control_frame = tk.Frame(root, padx=15, pady=12, bg="#161c26")
         control_frame.pack(side=tk.TOP, fill=tk.X)
@@ -205,19 +196,19 @@ class SubdivisionMapApp:
         lbl_style = {"bg": "#161c26", "fg": "#ffffff", "font": ("Arial", 10, "bold")}
 
         tk.Label(control_frame, text="Start Point:", **lbl_style).pack(side=tk.LEFT, padx=5)
-        self.start_var = tk.StringVar(value="My House")
-        self.start_menu = tk.OptionMenu(control_frame, self.start_var, *selectable_nodes)
+        self.start_var = tk.StringVar(value="Entrance_Gate_J1")
+        self.start_menu = tk.OptionMenu(control_frame, self.start_var, *sorted_keys)
         self.start_menu.config(bg="#242e3e", fg="white", highlightthickness=0, borderwidth=0, font=("Arial", 9))
         self.start_menu.pack(side=tk.LEFT, padx=5)
 
         tk.Label(control_frame, text="Destination:", **lbl_style).pack(side=tk.LEFT, padx=15)
-        self.target_var = tk.StringVar(value="Community Center")
-        self.target_menu = tk.OptionMenu(control_frame, self.target_var, *selectable_nodes)
+        self.target_var = tk.StringVar(value="House 38")
+        self.target_menu = tk.OptionMenu(control_frame, self.target_var, *sorted_keys)
         self.target_menu.config(bg="#242e3e", fg="white", highlightthickness=0, borderwidth=0, font=("Arial", 9))
         self.target_menu.pack(side=tk.LEFT, padx=5)
 
         btn_find = tk.Button(
-            control_frame, text="🎯 Find Route", command=self.update_map,
+            control_frame, text="🎯 Find Route from Gate", command=self.update_map,
             bg="#00b4d8", fg="white", font=("Arial", 10, "bold"), padx=12, relief=tk.FLAT, cursor="hand2"
         )
         btn_find.pack(side=tk.LEFT, padx=20)
@@ -234,72 +225,45 @@ class SubdivisionMapApp:
         self.canvas.delete("all")
         drawn_edges = set()
 
-        # 1. Draw Subdivision Paved Roads
-        non_road_nodes = list(HOUSES.keys())
+        # 1. Draw Road Lanes (junctions are used here only as invisible
+        #    geometry to route the road lines and house driveways through)
         for node, data in SUBDIVISION_MAP.items():
-            if node in non_road_nodes:
-                continue
             for neighbor in data["neighbors"]:
-                if neighbor in non_road_nodes:
-                    continue
-                
                 edge_id = tuple(sorted((node, neighbor)))
                 if edge_id not in drawn_edges and neighbor in SUBDIVISION_MAP:
                     x1, y1 = data["x"], data["y"]
                     x2, y2 = SUBDIVISION_MAP[neighbor]["x"], SUBDIVISION_MAP[neighbor]["y"]
-                    
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#1c2536", width=8, capstyle=tk.ROUND)
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#3a4b6e", width=3, capstyle=tk.ROUND)
+
+                    is_house_driveway = "House" in node or "House" in neighbor
+                    line_color = "#2a374a" if is_house_driveway else "#1c2536"
+                    lane_color = "#3a4b6e" if not is_house_driveway else "#2e3d59"
+
+                    self.canvas.create_line(x1, y1, x2, y2, fill=line_color, width=8, capstyle=tk.ROUND)
+                    self.canvas.create_line(x1, y1, x2, y2, fill=lane_color, width=3, capstyle=tk.ROUND)
                     drawn_edges.add(edge_id)
 
-        # 2. Draw Custom Styled Map Elements & Landmarks
+        # 2. Draw only the Entrance Gate and the Houses.
+        #    Junction_* nodes are intentionally NOT drawn - they exist purely
+        #    as invisible road geometry for pathfinding, not as visible markers.
         for node, data in SUBDIVISION_MAP.items():
+            if "Junction_" in node:
+                continue  # keep junctions invisible - they're road scaffolding only
+
             x, y = data["x"], data["y"]
 
-            # MAIN ENTRANCE GATE
             if "Entrance_Gate" in node:
-                self.canvas.create_rectangle(x - 12, y - 8, x + 12, y + 8, fill="#1e3a5f", outline="#2ec4b6", width=2)
-                self.canvas.create_line(x - 14, y, x + 14, y, fill="#ff4d6d", width=3)
-                self.canvas.create_text(x, y - 18, text="MAIN GATE", fill="#2ec4b6", font=("Arial", 9, "bold"))
-
-            # GUARD HOUSE
-            elif node == "Guard House":
-                self.canvas.create_rectangle(x - 8, y - 6, x + 8, y + 6, fill="#e63946", outline="#f1faee", width=2)
-                self.canvas.create_text(x, y - 16, text="🛡️ GUARD HOUSE", fill="#ff758f", font=("Arial", 8, "bold"))
-
-            # MY HOUSE
-            elif node == "My House":
-                self.canvas.create_polygon(x, y - 9, x - 8, y - 1, x + 8, y - 1, fill="#2a9d8f", outline="")
-                self.canvas.create_rectangle(x - 6, y - 1, x + 6, y + 6, fill="#e9c46a", outline="#264653", width=1)
-                self.canvas.create_text(x, y + 14, text="🏠 MY HOUSE", fill="#52b788", font=("Arial", 8, "bold"))
-
-            # COMMUNITY CENTER (Red Marker Point)
-            elif node == "Community Center":
-                self.canvas.create_oval(x - 8, y - 8, x + 8, y + 8, fill="#e63946", outline="#ffffff", width=2)
-                self.canvas.create_text(x, y - 16, text="📍 COMMUNITY CENTER", fill="#ff4d6d", font=("Arial", 8, "bold"))
-
-            # GAZEBO LANDMARK
-            elif node == "Gazebo":
-                r = 10
-                self.canvas.create_polygon(
-                    x, y - r, x + r*0.7, y - r*0.7, x + r, y, x + r*0.7, y + r*0.7,
-                    x, y + r, x - r*0.7, y + r*0.7, x - r, y, x - r*0.7, y - r*0.7,
-                    fill="#7209b7", outline="#4cc9f0", width=2
-                )
-                self.canvas.create_oval(x - 3, y - 3, x + 3, y + 3, fill="#f72585", outline="")
-                self.canvas.create_text(x, y + 16, text="🏛️ GAZEBO", fill="#4cc9f0", font=("Arial", 8, "bold"))
-
-            # REAL RESIDENCES / LANDMARKS FROM GOOGLE MAPS
-            elif node in ["Coco House", "Claros Residence", "Tats San Juan", "Dolindo Residence", "Block 1 Lot A5"]:
-                self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="#a855f7", outline="#ffffff", width=1)
-                self.canvas.create_text(x, y + 12, text=f"📍 {node}", fill="#c084fc", font=("Arial", 7, "bold"))
-
-            # STANDARD HOUSES
+                color = "#2ec4b6"  # Bright Teal for Main Gate
+                r = 7
+                lbl = "GATE (Balagtas Entrance)"
             elif "House" in node:
-                h_num = node.replace("House ", "")
-                self.canvas.create_polygon(x, y - 7, x - 6, y - 1, x + 6, y - 1, fill="#e76f51", outline="")
-                self.canvas.create_rectangle(x - 5, y - 1, x + 5, y + 5, fill="#e9c46a", outline="#264653", width=1)
-                self.canvas.create_text(x, y + 12, text=h_num, fill="#f4a261", font=("Arial", 7, "bold"))
+                color = "#ffb703"  # Gold for Houses
+                r = 4
+                lbl = node.replace("House ", "H")
+            else:
+                continue
+
+            self.canvas.create_oval(x - r, y - r, x + r, y + r, fill=color, outline="#0f141c", width=1)
+            self.canvas.create_text(x, y - 11, text=lbl, fill=color, font=("Arial", 7, "bold"))
 
     def draw_highlighted_path(self, path, color, offset=0):
         for i in range(len(path) - 1):
@@ -324,21 +288,13 @@ class SubdivisionMapApp:
             self.lbl_status.config(text="No path connections found.", fg="#ff4d6d")
             return
 
-        # Draw primary path
-        self.draw_highlighted_path(path1, "#00f5d4")
-
-        # Distance & Time calculations
-        distance_meters = calculate_path_distance_meters(path1)
-        walk_time_mins = math.ceil(distance_meters / (4.5 * 1000 / 60))
-        drive_time_mins = math.ceil(distance_meters / (20.0 * 1000 / 60))
-
-        status_txt = f"Distance: {int(distance_meters)}m | 🚶 Walk: ~{walk_time_mins} min | 🚗 Drive: ~{drive_time_mins} min"
+        self.draw_highlighted_path(path1, "#00f5d4")  # Primary route (Cyan)
 
         if path2:
-            self.draw_highlighted_path(path2, "#ffb703", offset=3)
-            self.lbl_status.config(text=f"{status_txt} (Alt Route in Gold)", fg="#00f5d4")
+            self.draw_highlighted_path(path2, "#ffb703", offset=3)  # Alt route (Gold)
+            self.lbl_status.config(text=f"Primary (Cyan: {len(path1)-1} stops) & Alt (Gold) mapped from Gate.", fg="#00f5d4")
         else:
-            self.lbl_status.config(text=status_txt, fg="#90e0ef")
+            self.lbl_status.config(text=f"Optimal route mapped ({len(path1)-1} stops from Gate).", fg="#90e0ef")
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -3,7 +3,7 @@ from collections import deque
 import math
 
 # =====================================================================
-# 1. MAP GEOMETRY & LANDMARKS (Earth and Homes Subdivision)
+# 1. MAP GEOMETRY & ROAD NETWORK (Earth and Homes Subdivision)
 # =====================================================================
 JUNCTION_GRAPH = {
     # === ENTRANCE GATE ===
@@ -47,79 +47,166 @@ JUNCTION_GRAPH = {
     "Junction_26": {"x": 725, "y": 539, "neighbors": ["Junction_22", "Junction_24"]},
     "Junction_24": {"x": 728, "y": 553, "neighbors": ["Junction_26", "Junction_28"]},
     
-    # Eastern Section & Loops
+    # === CURVED EASTERN SECTION ===
     "Junction_28": {"x": 816, "y": 544, "neighbors": ["Junction_24", "Junction_30", "Junction_35"]},
     "Junction_30": {"x": 824, "y": 531, "neighbors": ["Junction_28", "Junction_29"]},
     "Junction_29": {"x": 838, "y": 484, "neighbors": ["Junction_30", "Junction_27"]},
     "Junction_27": {"x": 840, "y": 476, "neighbors": ["Junction_29", "Junction_31"]},
     
-    "Junction_31": {"x": 903, "y": 500, "neighbors": ["Junction_23", "Junction_27", "Junction_32", "Junction_35"]},
-    "Junction_32": {"x": 1063, "y": 431, "neighbors": ["Junction_31"]},
-    "Junction_33": {"x": 946, "y": 650, "neighbors": ["Junction_35"]},
+    "Junction_31": {"x": 900, "y": 480, "neighbors": ["Junction_23", "Junction_27", "Curve_31_32_1", "Junction_35"]},
     
-    "Junction_35": {"x": 912, "y": 511, "neighbors": ["Junction_31", "Junction_28", "Junction_33", "Junction_34", "Junction_36"]},
-    "Junction_34": {"x": 1026, "y": 554, "neighbors": ["Junction_35", "Junction_36", "Junction_41"]},
-    "Junction_36": {"x": 1071, "y": 563, "neighbors": ["Junction_35", "Junction_34", "Junction_37"]},
+    # Top Curved Cul-de-sac Loop
+    "Curve_31_32_1": {"x": 950, "y": 472, "neighbors": ["Junction_31", "Curve_31_32_2"]},
+    "Curve_31_32_2": {"x": 1000, "y": 475, "neighbors": ["Curve_31_32_1", "Junction_32"]},
+    "Junction_32":    {"x": 1050, "y": 490, "neighbors": ["Curve_31_32_2"]},
     
-    "Junction_37": {"x": 1173, "y": 554, "neighbors": ["Junction_36", "Junction_38"]},
-    "Junction_38": {"x": 1167, "y": 695, "neighbors": ["Junction_37", "Junction_39"]},
-    "Junction_39": {"x": 1094, "y": 701, "neighbors": ["Junction_38", "Junction_40"]},
-    "Junction_40": {"x": 1096, "y": 685, "neighbors": ["Junction_39", "Junction_41"]},
-    "Junction_41": {"x": 1025, "y": 689, "neighbors": ["Junction_40", "Junction_34"]}
+    # Mid Vertical Connector
+    "Junction_35": {"x": 900, "y": 550, "neighbors": ["Junction_31", "Junction_28", "Curve_35_34_1", "Curve_35_37_1"]},
+    
+    # Center Curved Connector
+    "Curve_35_34_1": {"x": 965, "y": 542, "neighbors": ["Junction_35", "Curve_35_34_2"]},
+    "Curve_35_34_2": {"x": 1015, "y": 548, "neighbors": ["Curve_35_34_1", "Junction_34"]},
+    "Junction_34":    {"x": 1060, "y": 565, "neighbors": ["Curve_35_34_2", "Curve_34_36_1"]},
+    
+    # Right Curved Bend
+    "Curve_34_36_1": {"x": 1070, "y": 615, "neighbors": ["Junction_34", "Junction_36"]},
+    "Junction_36":    {"x": 1045, "y": 665, "neighbors": ["Curve_34_36_1", "Curve_36_37_1"]},
+    
+    # Bottom Curved Loop
+    "Curve_36_37_1": {"x": 975, "y": 675, "neighbors": ["Junction_36", "Junction_37"]},
+    "Junction_37":    {"x": 905, "y": 655, "neighbors": ["Curve_36_37_1", "Curve_35_37_1"]},
+    "Curve_35_37_1": {"x": 895, "y": 600, "neighbors": ["Junction_37", "Junction_35"]}
 }
 
-# Named Points & Google Maps Real Landmarks
-HOUSES = {
-    # Custom Labels
-    "My House": {"x": 184, "y": 169},
-    "Guard House": {"x": 212, "y": 240},
-    "Gazebo": {"x": 287, "y": 614},
-    
-    # Real Google Maps Landmarks
-    "Community Center": {"x": 420, "y": 565},
-    "Coco House": {"x": 550, "y": 530},
-    "Claros Residence": {"x": 560, "y": 440},
-    "Tats San Juan": {"x": 650, "y": 480},
-    "Dolindo Residence": {"x": 640, "y": 640},
-    "Block 1 Lot A5": {"x": 740, "y": 545},
+# Explicitly positioned purple landmarks to prevent label collision
+CUSTOM_PURPLE_LANDMARKS = {
+    "Coco House": {"x": 515, "y": 515, "align": "above", "text_offset": (0, -10)},
+    "Claros Residence": {"x": 590, "y": 470, "align": "above", "text_offset": (-20, -10)},
+    "Tats San Juan": {"x": 670, "y": 450, "align": "below", "text_offset": (20, 10)},
+    "Dolindo Residence": {"x": 480, "y": 620, "align": "below", "text_offset": (0, 10)},
+    "Block 1 Lot A45": {"x": 1030, "y": 480, "align": "above", "text_offset": (0, -10)}
+}
 
-    # Standard Houses
-    "House 3": {"x": 159, "y": 252}, "House 4": {"x": 202, "y": 356},
-    "House 5": {"x": 142, "y": 343}, "House 6": {"x": 169, "y": 418},
-    "House 7": {"x": 68, "y": 313},  "House 8": {"x": 69, "y": 335},
-    "House 9": {"x": 322, "y": 479}, "House 10": {"x": 322, "y": 489},
-    "House 11": {"x": 167, "y": 572}, "House 13": {"x": 122, "y": 506},
-    "House 14": {"x": 151, "y": 546}, "House 15": {"x": 216, "y": 547},
-    "House 16": {"x": 198, "y": 515}, "House 17": {"x": 531, "y": 521},
-    "House 18": {"x": 506, "y": 538}, "House 19": {"x": 455, "y": 628},
-    "House 20": {"x": 494, "y": 623}, "House 21": {"x": 578, "y": 596},
-    "House 22": {"x": 621, "y": 579}, "House 23": {"x": 668, "y": 562},
-    "House 24": {"x": 714, "y": 552}, "House 25": {"x": 677, "y": 489},
-    "House 26": {"x": 689, "y": 445}, "House 27": {"x": 751, "y": 454},
-    "House 28": {"x": 800, "y": 452}, "House 29": {"x": 719, "y": 454},
-    "House 30": {"x": 870, "y": 478}, "House 31": {"x": 822, "y": 540},
-    "House 32": {"x": 831, "y": 489}, "House 33": {"x": 900, "y": 498},
-    "House 34": {"x": 833, "y": 606}, "House 35": {"x": 986, "y": 574},
-    "House 36": {"x": 959, "y": 640}, "House 37": {"x": 1098, "y": 615},
-    "House 38": {"x": 1070, "y": 693}, "House 39": {"x": 1062, "y": 424}
+HOUSES = {
+    "My House": {"x": 210, "y": 180},
+    "Guard House": {"x": 230, "y": 180},
+    "Gazebo": {"x": 240, "y": 580},
+    "Community Center": {"x": 370, "y": 530},
+
+   
+    "House 4": {"x": 210, "y": 410},
+   
+    "House 6": {"x": 90,  "y": 450},
+    "House 7": {"x": 80,  "y": 220},
+    "House 8": {"x": 210, "y": 450},
+    "House 9": {"x": 300, "y": 380},
+    "House 10": {"x": 250, "y": 410},
+  
+    "House 13": {"x": 100, "y": 500},
+    "House 14": {"x": 170, "y": 430},
+    "House 15": {"x": 200, "y": 580},
+    
+    "House 18": {"x": 330, "y": 640},
+    "House 19": {"x": 330, "y": 600},
+    "House 20": {"x": 430, "y": 650},
+    "House 21": {"x": 440, "y": 600},
+    "House 22": {"x": 630, "y": 520},
+    "House 23": {"x": 660, "y": 500},
+    "House 24": {"x": 740, "y": 530},
+   
+    "House 26": {"x": 800, "y": 520},
+    "House 27": {"x": 820, "y": 460},
+    "House 28": {"x": 860, "y": 460},
+    
+    "House 30": {"x": 920, "y": 460},
+   
+    "House 34": {"x": 1030, "y": 540},
+    "House 35": {"x": 1080, "y": 580},
+    "House 36": {"x": 1060, "y": 680},
+    "House 37": {"x": 920, "y": 670},
+    "House 38": {"x": 980, "y": 690},
+    "House 39": {"x": 880, "y": 620}
 }
 
 METERS_PER_PIXEL = 0.65 
 
-def assemble_full_map():
-    """Builds clean map network with custom house and landmark attachments."""
-    full_map = {node: dict(data) for node, data in JUNCTION_GRAPH.items()}
-    junction_keys = list(JUNCTION_GRAPH.keys())
+def point_to_segment_projection(px, py, ax, ay, bx, by):
+    abx = bx - ax
+    aby = by - ay
+    ab_len_sq = abx**2 + aby**2
+    if ab_len_sq == 0:
+        return ax, ay, 0, 0
+    t = max(0, min(1, ((px - ax) * abx + (py - ay) * aby) / ab_len_sq))
+    proj_x = ax + t * abx
+    proj_y = ay + t * aby
+    return proj_x, proj_y, abx, aby
 
-    for house_name, h_data in HOUSES.items():
+def snap_houses_to_road_edges(houses_dict, junctions_dict, offset_dist=10):
+    edges = set()
+    for u, u_data in junctions_dict.items():
+        for v in u_data["neighbors"]:
+            if v in junctions_dict:
+                edge = tuple(sorted((u, v)))
+                edges.add(edge)
+
+    snapped = {}
+    for name, h_data in houses_dict.items():
         hx, hy = h_data["x"], h_data["y"]
-        closest_j = min(
-            junction_keys,
-            key=lambda j: math.hypot(JUNCTION_GRAPH[j]["x"] - hx, JUNCTION_GRAPH[j]["y"] - hy)
-        )
+        
+        best_dist = float("inf")
+        best_snapped_pos = (hx, hy)
+        best_junction = None
 
-        full_map[house_name] = {"x": hx, "y": hy, "neighbors": [closest_j]}
-        full_map[closest_j]["neighbors"].append(house_name)
+        for u, v in edges:
+            ax, ay = junctions_dict[u]["x"], junctions_dict[u]["y"]
+            bx, by = junctions_dict[v]["x"], junctions_dict[v]["y"]
+
+            proj_x, proj_y, dx, dy = point_to_segment_projection(hx, hy, ax, ay, bx, by)
+            dist = math.hypot(hx - proj_x, hy - proj_y)
+
+            if dist < best_dist:
+                best_dist = dist
+                
+                norm_len = math.hypot(dx, dy)
+                if norm_len > 0:
+                    nx, ny = -dy / norm_len, dx / norm_len
+                    dot = (hx - proj_x) * nx + (hy - proj_y) * ny
+                    if dot < 0:
+                        nx, ny = -nx, -ny
+                    offset_x = proj_x + nx * offset_dist
+                    offset_y = proj_y + ny * offset_dist
+                else:
+                    offset_x, offset_y = proj_x, proj_y
+
+                best_snapped_pos = (int(offset_x), int(offset_y))
+                dist_u = math.hypot(proj_x - ax, proj_y - ay)
+                dist_v = math.hypot(proj_x - bx, proj_y - by)
+                best_junction = u if dist_u < dist_v else v
+
+        snapped[name] = {
+            "x": best_snapped_pos[0],
+            "y": best_snapped_pos[1],
+            "junction": best_junction
+        }
+    return snapped
+
+def assemble_full_map():
+    snapped_houses = snap_houses_to_road_edges(HOUSES, JUNCTION_GRAPH, offset_dist=12)
+    snapped_purple = snap_houses_to_road_edges(CUSTOM_PURPLE_LANDMARKS, JUNCTION_GRAPH, offset_dist=8)
+
+    full_map = {node: dict(data) for node, data in JUNCTION_GRAPH.items()}
+
+    for house_name, h_data in snapped_houses.items():
+        hx, hy = h_data["x"], h_data["y"]
+        target_j = h_data["junction"]
+        full_map[house_name] = {"x": hx, "y": hy, "neighbors": [target_j]}
+        full_map[target_j]["neighbors"].append(house_name)
+
+    for p_name, p_data in snapped_purple.items():
+        px, py = p_data["x"], p_data["y"]
+        target_j = p_data["junction"]
+        full_map[p_name] = {"x": px, "y": py, "neighbors": [target_j]}
+        full_map[target_j]["neighbors"].append(p_name)
 
     return full_map
 
@@ -195,8 +282,10 @@ class SubdivisionMapApp:
         self.root.title("Earth and Homes Subdivision (Balagtas) - Navigation System")
         self.root.configure(bg="#0f141c")
 
-        # Selectable targets
-        selectable_nodes = [node for node in SUBDIVISION_MAP.keys() if "Junction" not in node]
+        selectable_nodes = [
+            node for node in SUBDIVISION_MAP.keys() 
+            if "Junction" not in node and "Curve" not in node
+        ]
         selectable_nodes.sort()
 
         control_frame = tk.Frame(root, padx=15, pady=12, bg="#161c26")
@@ -234,8 +323,7 @@ class SubdivisionMapApp:
         self.canvas.delete("all")
         drawn_edges = set()
 
-        # 1. Draw Subdivision Paved Roads
-        non_road_nodes = list(HOUSES.keys())
+        non_road_nodes = list(HOUSES.keys()) + list(CUSTOM_PURPLE_LANDMARKS.keys())
         for node, data in SUBDIVISION_MAP.items():
             if node in non_road_nodes:
                 continue
@@ -248,65 +336,69 @@ class SubdivisionMapApp:
                     x1, y1 = data["x"], data["y"]
                     x2, y2 = SUBDIVISION_MAP[neighbor]["x"], SUBDIVISION_MAP[neighbor]["y"]
                     
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#1c2536", width=8, capstyle=tk.ROUND)
-                    self.canvas.create_line(x1, y1, x2, y2, fill="#3a4b6e", width=3, capstyle=tk.ROUND)
+                    self.canvas.create_line(x1, y1, x2, y2, fill="#1c2536", width=8, capstyle=tk.ROUND, joinstyle=tk.ROUND)
+                    self.canvas.create_line(x1, y1, x2, y2, fill="#3a4b6e", width=3, capstyle=tk.ROUND, joinstyle=tk.ROUND)
                     drawn_edges.add(edge_id)
 
-        # 2. Draw Custom Styled Map Elements & Landmarks
         for node, data in SUBDIVISION_MAP.items():
             x, y = data["x"], data["y"]
 
-            # MAIN ENTRANCE GATE
             if "Entrance_Gate" in node:
                 self.canvas.create_rectangle(x - 12, y - 8, x + 12, y + 8, fill="#1e3a5f", outline="#2ec4b6", width=2)
                 self.canvas.create_line(x - 14, y, x + 14, y, fill="#ff4d6d", width=3)
                 self.canvas.create_text(x, y - 18, text="MAIN GATE", fill="#2ec4b6", font=("Arial", 9, "bold"))
 
-            # GUARD HOUSE
             elif node == "Guard House":
                 self.canvas.create_rectangle(x - 8, y - 6, x + 8, y + 6, fill="#e63946", outline="#f1faee", width=2)
-                self.canvas.create_text(x, y - 16, text="🛡️ GUARD HOUSE", fill="#ff758f", font=("Arial", 8, "bold"))
+                self.canvas.create_text(x + 12, y, text="🛡️ GUARD HOUSE", fill="#ff758f", font=("Arial", 8, "bold"), anchor="w")
 
-            # MY HOUSE
             elif node == "My House":
                 self.canvas.create_polygon(x, y - 9, x - 8, y - 1, x + 8, y - 1, fill="#2a9d8f", outline="")
                 self.canvas.create_rectangle(x - 6, y - 1, x + 6, y + 6, fill="#e9c46a", outline="#264653", width=1)
-                self.canvas.create_text(x, y + 14, text="🏠 MY HOUSE", fill="#52b788", font=("Arial", 8, "bold"))
+                self.canvas.create_text(x - 10, y, text="🏠 MY HOUSE", fill="#52b788", font=("Arial", 8, "bold"), anchor="e")
 
-            # COMMUNITY CENTER (Red Marker Point)
             elif node == "Community Center":
                 self.canvas.create_oval(x - 8, y - 8, x + 8, y + 8, fill="#e63946", outline="#ffffff", width=2)
                 self.canvas.create_text(x, y - 16, text="📍 COMMUNITY CENTER", fill="#ff4d6d", font=("Arial", 8, "bold"))
 
-            # GAZEBO LANDMARK
             elif node == "Gazebo":
-                r = 10
+                r = 8
                 self.canvas.create_polygon(
                     x, y - r, x + r*0.7, y - r*0.7, x + r, y, x + r*0.7, y + r*0.7,
                     x, y + r, x - r*0.7, y + r*0.7, x - r, y, x - r*0.7, y - r*0.7,
                     fill="#7209b7", outline="#4cc9f0", width=2
                 )
                 self.canvas.create_oval(x - 3, y - 3, x + 3, y + 3, fill="#f72585", outline="")
-                self.canvas.create_text(x, y + 16, text="🏛️ GAZEBO", fill="#4cc9f0", font=("Arial", 8, "bold"))
+                self.canvas.create_text(x, y + 14, text="🏛️ GAZEBO", fill="#4cc9f0", font=("Arial", 8, "bold"))
 
-            # REAL RESIDENCES / LANDMARKS FROM GOOGLE MAPS
-            elif node in ["Coco House", "Claros Residence", "Tats San Juan", "Dolindo Residence", "Block 1 Lot A5"]:
-                self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="#a855f7", outline="#ffffff", width=1)
-                self.canvas.create_text(x, y + 12, text=f"📍 {node}", fill="#c084fc", font=("Arial", 7, "bold"))
+            elif node in CUSTOM_PURPLE_LANDMARKS:
+                self.canvas.create_oval(x - 4, y - 4, x + 4, y + 4, fill="#a855f7", outline="#ffffff", width=1.5)
+                
+                # Apply custom offsets to labels so they don't overlap each other
+                off_x, off_y = CUSTOM_PURPLE_LANDMARKS[node].get("text_offset", (0, 0))
+                align = CUSTOM_PURPLE_LANDMARKS[node].get("align", "above")
+                
+                anchor_style = "s" if align == "above" else "n"
+                self.canvas.create_text(
+                    x + off_x, y + off_y, 
+                    text=f"📍 {node}", 
+                    fill="#d8b4fe", 
+                    font=("Arial", 8, "bold"), 
+                    anchor=anchor_style
+                )
 
-            # STANDARD HOUSES
             elif "House" in node:
                 h_num = node.replace("House ", "")
-                self.canvas.create_polygon(x, y - 7, x - 6, y - 1, x + 6, y - 1, fill="#e76f51", outline="")
-                self.canvas.create_rectangle(x - 5, y - 1, x + 5, y + 5, fill="#e9c46a", outline="#264653", width=1)
-                self.canvas.create_text(x, y + 12, text=h_num, fill="#f4a261", font=("Arial", 7, "bold"))
+                self.canvas.create_polygon(x, y - 5, x - 5, y - 1, x + 5, y - 1, fill="#e76f51", outline="")
+                self.canvas.create_rectangle(x - 4, y - 1, x + 4, y + 4, fill="#e9c46a", outline="#264653", width=1)
+                self.canvas.create_text(x, y + 10, text=h_num, fill="#f4a261", font=("Arial", 6, "bold"))
 
     def draw_highlighted_path(self, path, color, offset=0):
         for i in range(len(path) - 1):
             n1, n2 = path[i], path[i + 1]
             x1, y1 = SUBDIVISION_MAP[n1]["x"] + offset, SUBDIVISION_MAP[n1]["y"] + offset
             x2, y2 = SUBDIVISION_MAP[n2]["x"] + offset, SUBDIVISION_MAP[n2]["y"] + offset
-            self.canvas.create_line(x1, y1, x2, y2, fill=color, width=5, capstyle=tk.ROUND)
+            self.canvas.create_line(x1, y1, x2, y2, fill=color, width=5, capstyle=tk.ROUND, joinstyle=tk.ROUND)
 
     def update_map(self):
         start = self.start_var.get()
@@ -324,10 +416,8 @@ class SubdivisionMapApp:
             self.lbl_status.config(text="No path connections found.", fg="#ff4d6d")
             return
 
-        # Draw primary path
         self.draw_highlighted_path(path1, "#00f5d4")
 
-        # Distance & Time calculations
         distance_meters = calculate_path_distance_meters(path1)
         walk_time_mins = math.ceil(distance_meters / (4.5 * 1000 / 60))
         drive_time_mins = math.ceil(distance_meters / (20.0 * 1000 / 60))
