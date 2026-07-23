@@ -13,11 +13,14 @@ JUNCTION_GRAPH = {
     # West Grid Row 1
     "Junction_3": {"x": 144, "y": 205, "neighbors": ["Junction_2", "Junction_4", "Junction_9"]},
     "Junction_4": {"x": 99,  "y": 232, "neighbors": ["Junction_3", "Junction_5", "Junction_8"]},
-    "Junction_5": {"x": 60,  "y": 265, "neighbors": ["Junction_4", "Junction_6"]},
+    "Junction_5": {"x": 60,  "y": 265, "neighbors": ["Junction_4", "Junction_6", "Junction_14_Top"]}, # Connected down to 14
+
+    # New Left Vertical Outer Road (House 7 -> House 14)
+    "Junction_14_Top": {"x": 135, "y": 420, "neighbors": ["Junction_5", "Junction_7"]},
 
     # West Grid Row 2
     "Junction_6": {"x": 112, "y": 451, "neighbors": ["Junction_5", "Junction_7", "Junction_10"]},
-    "Junction_7": {"x": 182, "y": 451, "neighbors": ["Junction_6", "Junction_8", "Junction_11"]},
+    "Junction_7": {"x": 182, "y": 451, "neighbors": ["Junction_6", "Junction_8", "Junction_11", "Junction_14_Top"]},
     "Junction_8": {"x": 230, "y": 430, "neighbors": ["Junction_7", "Junction_4", "Junction_9", "Junction_12"]},
     "Junction_9": {"x": 284, "y": 392, "neighbors": ["Junction_8", "Junction_3", "Junction_13"]},
 
@@ -36,18 +39,18 @@ JUNCTION_GRAPH = {
     "Junction_17": {"x": 357, "y": 568, "neighbors": ["Junction_14", "Junction_18", "Junction_19"]},
     "Junction_18": {"x": 352, "y": 607, "neighbors": ["Junction_16", "Junction_17", "Junction_20"]},
 
-    # Central Main Avenue
-    "Junction_19": {"x": 419, "y": 560, "neighbors": ["Junction_17", "Junction_21"]},
-    "Junction_21": {"x": 422, "y": 574, "neighbors": ["Junction_19", "Junction_25"]},
+    # Central Main Avenue (Round Loop near Community Center & Dolindo)
+    "Junction_19": {"x": 419, "y": 560, "neighbors": ["Junction_17", "Junction_21", "Junction_20"]}, # Closed loop
+    "Junction_21": {"x": 422, "y": 574, "neighbors": ["Junction_19", "Junction_25", "Junction_20"]}, # Closed loop
     "Junction_25": {"x": 649, "y": 474, "neighbors": ["Junction_21", "Junction_23"]},
-    "Junction_23": {"x": 642, "y": 466, "neighbors": ["Junction_25", "Junction_31"]},
+    "Junction_23": {"x": 642, "y": 466, "neighbors": ["Junction_25", "Junction_31", "Junction_24"]},
 
-    "Junction_20": {"x": 416, "y": 628, "neighbors": ["Junction_18", "Junction_22"]},
+    "Junction_20": {"x": 416, "y": 628, "neighbors": ["Junction_18", "Junction_22", "Junction_19", "Junction_21"]}, # Closed loop
     "Junction_22": {"x": 424, "y": 618, "neighbors": ["Junction_20", "Junction_26"]},
     "Junction_26": {"x": 725, "y": 539, "neighbors": ["Junction_22", "Junction_24"]},
-    "Junction_24": {"x": 728, "y": 553, "neighbors": ["Junction_26", "Junction_28"]},
+    "Junction_24": {"x": 728, "y": 553, "neighbors": ["Junction_26", "Junction_28", "Junction_23"]},
 
-    # === CURVED EASTERN SECTION ===
+    # === CURVED EASTERN SECTION (Outer Box Loop) ===
     "Junction_28": {"x": 816, "y": 544, "neighbors": ["Junction_24", "Junction_30", "Junction_35"]},
     "Junction_30": {"x": 824, "y": 531, "neighbors": ["Junction_28", "Junction_29"]},
     "Junction_29": {"x": 838, "y": 484, "neighbors": ["Junction_30", "Junction_27"]},
@@ -55,26 +58,27 @@ JUNCTION_GRAPH = {
 
     "Junction_31": {"x": 900, "y": 480, "neighbors": ["Junction_23", "Junction_27", "Curve_31_32_1", "Junction_35"]},
 
-    # Top Curved Cul-de-sac Loop
+    # Top Curved Loop
     "Curve_31_32_1": {"x": 950, "y": 472, "neighbors": ["Junction_31", "Curve_31_32_2"]},
     "Curve_31_32_2": {"x": 1000, "y": 475, "neighbors": ["Curve_31_32_1", "Junction_32"]},
-    "Junction_32":    {"x": 1050, "y": 490, "neighbors": ["Curve_31_32_2"]},
+    "Junction_32":     {"x": 1050, "y": 490, "neighbors": ["Curve_31_32_2", "Junction_34"]}, # Connected directly down to 34
 
     # Mid Vertical Connector
-    "Junction_35": {"x": 900, "y": 550, "neighbors": ["Junction_31", "Junction_28", "Curve_35_34_1", "Curve_35_37_1"]},
+    "Junction_35": {"x": 900, "y": 550, "neighbors": ["Junction_31", "Junction_28", "Curve_35_34_1", "Junction_39"]}, # Connected down to 39
+    "Junction_39": {"x": 900, "y": 640, "neighbors": ["Junction_35", "Junction_37"]}, # Vertical wall down to 37
 
     # Center Curved Connector
     "Curve_35_34_1": {"x": 965, "y": 542, "neighbors": ["Junction_35", "Curve_35_34_2"]},
     "Curve_35_34_2": {"x": 1015, "y": 548, "neighbors": ["Curve_35_34_1", "Junction_34"]},
-    "Junction_34":    {"x": 1060, "y": 565, "neighbors": ["Curve_35_34_2", "Curve_34_36_1"]},
+    "Junction_34":     {"x": 1060, "y": 550, "neighbors": ["Curve_35_34_2", "Junction_32", "Junction_36"]}, # Connected straight down to 36
 
-    # Right Curved Bend
-    "Curve_34_36_1": {"x": 1070, "y": 615, "neighbors": ["Junction_34", "Junction_36"]},
-    "Junction_36":    {"x": 1045, "y": 665, "neighbors": ["Curve_34_36_1", "Curve_36_37_1"]},
+    # Right Straight Wall
+    "Junction_36":     {"x": 1060, "y": 655, "neighbors": ["Junction_34", "Curve_36_37_1"]},
 
-    # Bottom Curved Loop
-    "Curve_36_37_1": {"x": 975, "y": 675, "neighbors": ["Junction_36", "Junction_37"]},
-    "Junction_37":    {"x": 905, "y": 655, "neighbors": ["Curve_36_37_1", "Curve_35_37_1"]},
+    # Bottom Outer Loop & West Extension
+    "Curve_36_37_1": {"x": 975, "y": 665, "neighbors": ["Junction_36", "Junction_37"]},
+    "Junction_37":     {"x": 905, "y": 655, "neighbors": ["Curve_36_37_1", "Junction_39", "Junction_37_West"]},
+    "Junction_37_West":{"x": 750, "y": 655, "neighbors": ["Junction_37"]},
     "Curve_35_37_1": {"x": 895, "y": 600, "neighbors": ["Junction_37", "Junction_35"]}
 }
 
