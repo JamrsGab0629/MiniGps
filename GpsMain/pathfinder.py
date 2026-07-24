@@ -7,6 +7,9 @@ METERS_PER_PIXEL = 0.65  # Scale: 1 pixel ≈ 0.65 meters
 
 def find_path_bfs(graph, start, target, blocked_edge=None, house_names=None):
     """Standard Breadth-First Search bypassing other houses."""
+    if start not in graph or target not in graph:
+        return None
+
     if house_names is None:
         house_names = set()
 
@@ -42,6 +45,9 @@ def find_path_bfs(graph, start, target, blocked_edge=None, house_names=None):
 
 def find_path_dijkstra(graph, start, target, blocked_edge=None, house_names=None):
     """Shortest Path algorithm based on physical Euclidean distance (meters/pixels)."""
+    if start not in graph or target not in graph:
+        return None
+
     if house_names is None:
         house_names = set()
 
@@ -85,30 +91,34 @@ def calculate_paths(graph, start, target, house_names=None, mode="dijkstra"):
     Finds the primary shortest path and second-shortest path by physical distance.
     `mode` can be 'dijkstra' (recommended for exact distance) or 'bfs'.
     """
+    if start not in graph or target not in graph:
+        return None, None
+
     search_algo = find_path_dijkstra if mode == "dijkstra" else find_path_bfs
 
     # 1. Find initial primary path
-    p1 = search_algo(graph, start, target, house_names=house_names)
-    if not p1:
+    primary_path = search_algo(graph, start, target, house_names=house_names)
+    if not primary_path:
         return None, None
 
     # 2. Collect alternative candidate paths using edge-blocking
-    candidate_paths = [p1]
-    for i in range(len(p1) - 1):
+    alt_candidates = []
+    for i in range(len(primary_path) - 1):
         alt = search_algo(
             graph, start, target, 
-            blocked_edge=(p1[i], p1[i + 1]), 
+            blocked_edge=(primary_path[i], primary_path[i + 1]), 
             house_names=house_names
         )
-        if alt and alt not in candidate_paths:
-            candidate_paths.append(alt)
+        # Alt path must exist AND must not be identical to primary path
+        if alt and alt != primary_path and alt not in alt_candidates:
+            alt_candidates.append(alt)
 
-    # 3. Sort candidate paths strictly by PHYSICAL DISTANCE (meters)
-    candidate_paths.sort(key=lambda path: calculate_path_distance(graph, path))
-
-    # 4. Assign true shortest and true second-shortest
-    primary_path = candidate_paths[0]
-    second_path = candidate_paths[1] if len(candidate_paths) > 1 else None
+    # 3. Sort alternative paths strictly by PHYSICAL DISTANCE (meters)
+    if alt_candidates:
+        alt_candidates.sort(key=lambda path: calculate_path_distance(graph, path))
+        second_path = alt_candidates[0]
+    else:
+        second_path = None
 
     return primary_path, second_path
 
@@ -121,8 +131,9 @@ def calculate_path_distance(graph, path):
     total_pixels = 0.0
     for i in range(len(path) - 1):
         n1, n2 = path[i], path[i + 1]
-        x1, y1 = graph[n1]["x"], graph[n1]["y"]
-        x2, y2 = graph[n2]["x"], graph[n2]["y"]
-        total_pixels += math.hypot(x2 - x1, y2 - y1)
+        if n1 in graph and n2 in graph:
+            x1, y1 = graph[n1]["x"], graph[n1]["y"]
+            x2, y2 = graph[n2]["x"], graph[n2]["y"]
+            total_pixels += math.hypot(x2 - x1, y2 - y1)
 
     return total_pixels * METERS_PER_PIXEL

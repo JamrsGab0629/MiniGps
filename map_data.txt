@@ -14194,8 +14194,8 @@
             "type": "purple"
         },
         "Alcelmos House": {
-            "x": 356,
-            "y": 470,
+            "x": 340,
+            "y": 454,
             "type": "default"
         },
         "Cardos house": {
