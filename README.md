@@ -43,7 +43,7 @@ In addition to route computation, the application provides an interactive canvas
 
 ### 🗑️ Deleting Elements & Clearing
 * **Delete a Single Node:** Click on any house or junction to select it (highlighted in red), then press **`Delete`** or **`Backspace`** on your keyboard.
-* **Clear Entire Map:** Click the **`🗑️ Clear All`** button in the control panel to erase all houses, junctions, and roads to start fresh.
+* **Clear Entire Map:** Click the **`🗑️ Clear All`** button in the control panel to erase all houses, junctions, and roads to start fresh
 
 ### 🎯 Computing & Animating Routes
 1. Choose a **Start** house and a **Target** house from the top drop-down menus.
