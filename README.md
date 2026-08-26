@@ -12,6 +12,7 @@ In addition to route computation, the application provides an interactive canvas
 
 # Features
 
+
 * 🗺 **Interactive Map & Editor:** Real-time visual editor to create, connect, move, and remove houses and road junctions.
 * 🏠 **House & Landmark Selection:** Choose any registered house as a start or target location using dynamic drop-down menus.
 * 📍 **Smart Node Snapping:** Automatically snaps houses and landmarks to their nearest road junction.
@@ -115,3 +116,6 @@ gps_navigation/
 ├── pathfinding.py   # BFS algorithm & alternate route generation logic
 ├── storage.py       # Local file storage (JSON/map_data.txt loader and saver)
 └── map_data.txt     # Saved JSON configuration for houses and junctions
+
+
+```
