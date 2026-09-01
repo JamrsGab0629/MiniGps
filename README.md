@@ -50,12 +50,12 @@ In addition to route computation, the application provides an interactive canvas
 1. Choose a **Start** house and a **Target** house from the top drop-down menus.
 2. Click **`🎯 Route`**.
 3. The system will calculate path metrics, display the information box in the upper right corner, and sequentially animate the primary and alternative paths step-by-step.
-
+4.
 ---
 
 # Technologies Used
 
-* **Python 3.x**
+* **Python 3.x** 
 * **Tkinter** (GUI and Canvas Animation)
 * **Collections** (`deque` for queue-based BFS)
 * **Math Library** (Euclidean distance calculations)
