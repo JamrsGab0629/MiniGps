@@ -101,7 +101,7 @@ Travel times are estimated using speed assumptions tailored to a subdivision set
 * **Driving Speed:** $333 \text{ meters/min} \approx 20 \text{ km/h}$
 
 $$\text{Time (minutes)} = \frac{\text{Distance (meters)}}{\text{Speed (meters/min)}}$$
-
+ffff
 ---
 
 # Project Structure
