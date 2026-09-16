@@ -57,7 +57,7 @@ In addition to route computation, the application provides an interactive canvas
 
 * **Python 3.x** 
 * **Tkinter** (GUI and Canvas Animation)
-* **Collections** (`deque` for queue-based BFS)
+* **Collections** (`deque` for queue-based BFS)fffff
 * **Math Library** (Euclidean distance calculations)
 * **JSON / File I/O** (Data persistence)
 
